@@ -2175,7 +2175,7 @@
                 const urlMatch = name.match(/(https?:\/\/[^\s]+)/);
                 if (urlMatch) {
                     const urlInName = urlMatch[1];
-                    accommodationName = name.replace(urlInName, '').trim().replace(/^[•\s]+/, '').replace(/^[•\s]+/, '');
+                    accommodationName = name.replace(urlInName, '').trim().replace(/^[•\s•]+/g, '').replace(/[•\s•]+$/g, '');
                     const websiteUrl = urlInName;
                     const websiteText = websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
                     websiteDisplay = `<span class="info-value link" onclick="window.open('${websiteUrl}', '_blank')">${websiteText}</span>`;
@@ -2195,7 +2195,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">Accommodation</span>
-                            <span class="info-value">${accommodationName}${type ? ` • ${type}` : ''}</span>
+                            <span class="info-value">${accommodationName.replace(/^[•\s•]+/g, '').trim()}${type ? ` • ${type}` : ''}</span>
                         </div>
                         ${dateDisplay ? `
                         <div class="info-row">
