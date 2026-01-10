@@ -2099,15 +2099,33 @@
                 const fields = record.fields;
                 const name = fields['Accommodation Name'] || 'Unnamed';
                 const type = fields['Accommodation Type'] || '';
-                const checkIn = formatDate(fields['Check-in Date']);
-                const checkOut = formatDate(fields['Check-out Date']);
+                // Use date strings directly from Airtable
+                const checkIn = fields['Check-in Date'] || '';
+                const checkOut = fields['Check-out Date'] || '';
+                const website = fields['Website'] || fields['URL'] || '';
+                
+                // Format date range if both dates exist
+                let dateDisplay = '';
+                if (checkIn && checkOut) {
+                    dateDisplay = `${checkIn} - ${checkOut}`;
+                } else if (checkIn) {
+                    dateDisplay = checkIn;
+                }
+                
+                // Make website clickable
+                let websiteDisplay = '';
+                if (website) {
+                    const websiteUrl = website.startsWith('http') ? website : `https://${website}`;
+                    const websiteText = website.replace(/^https?:\/\//, '').replace(/^www\./, '');
+                    websiteDisplay = `<a href="${websiteUrl}" target="_blank" class="info-value link" style="text-decoration: none; color: var(--teal);">${websiteText}</a>`;
+                }
 
                 return `
                     <div class="accommodation-item">
                         <div class="accommodation-info">
                             <div class="accommodation-details">
-                                <div class="accommodation-name">${name}</div>
-                                <div class="accommodation-type">${type} • ${checkIn} - ${checkOut}</div>
+                                ${websiteDisplay ? `<div class="accommodation-name">${websiteDisplay}</div>` : ''}
+                                <div class="accommodation-type">${name}${dateDisplay ? ` • ${dateDisplay}` : ''}</div>
                             </div>
                         </div>
                     </div>
