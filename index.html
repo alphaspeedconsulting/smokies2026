@@ -1019,6 +1019,16 @@
     </style>
 </head>
 <body>
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobile-overlay" onclick="closeMobileMenu()"></div>
+
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo">Smokies <span>2026</span></div>
@@ -1428,6 +1438,27 @@
             ACCOMMODATIONS: 'Accommodations'
         };
 
+        // Mobile Menu Functions
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const btn = document.getElementById('mobile-menu-btn');
+            
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+            btn.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const btn = document.getElementById('mobile-menu-btn');
+            
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+            btn.classList.remove('active');
+        }
+
         // Navigation - Initialize after DOM is ready
         function initNavigation() {
             document.querySelectorAll('.nav-link').forEach(link => {
@@ -1437,6 +1468,11 @@
                     // Update active nav link
                     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
                     this.classList.add('active');
+                    
+                    // Close mobile menu if open
+                    if (window.innerWidth <= 768) {
+                        closeMobileMenu();
+                    }
                     
                     // Get section ID
                     const sectionId = this.getAttribute('data-section');
