@@ -1950,50 +1950,26 @@
                 return;
             }
 
-            if (!data.records || data.records.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🚗</div>
-                        <div>No vehicles found. Add your first vehicle!</div>
+            // Show summary card similar to Schedule page
+            container.innerHTML = `
+                <div class="schedule-item">
+                    <div class="schedule-date">TBD</div>
+                    <div class="schedule-title">Logistics Summary</div>
+                    <div class="schedule-description">
+                        Vehicle and transportation details will be updated as logistics are finalized. Check back soon for complete information.
                     </div>
-                `;
+                </div>
+            `;
+
+            // Update count if we have data
+            if (data.records && data.records.length > 0) {
+                countBadge.textContent = data.records.length;
+                if (statElement) statElement.textContent = data.records.length;
+                ALL_RECORDS.vehicles = data.records; // Store for filtering
+            } else {
                 countBadge.textContent = '0';
                 if (statElement) statElement.textContent = '0';
-                return;
             }
-
-            countBadge.textContent = data.records.length;
-            if (statElement) statElement.textContent = data.records.length;
-
-            ALL_RECORDS.vehicles = data.records; // Store for filtering
-            
-            container.innerHTML = data.records.map(record => {
-                const fields = record.fields;
-                const carDetails = fields['Car Details'] || fields['Car Number'] || 'Vehicle';
-                const attendees = fields['Attendees'] ? formatLinkedRecords(fields['Attendees']) : 'TBD';
-                const transportMethod = fields['Transport Method'] || 'TBD';
-                const shippingProvider = fields['Shipping Provider'] || '';
-
-                return `
-                    <div class="logistics-card" data-record-id="${record.id}" data-transport="${transportMethod}">
-                        <div class="logistics-vehicle">${carDetails}</div>
-                        <div class="logistics-detail">
-                            <strong>Owner(s):</strong>
-                            <span>${attendees}</span>
-                        </div>
-                        <div class="logistics-detail">
-                            <strong>Transport Method:</strong>
-                            <span>${transportMethod}</span>
-                        </div>
-                        ${shippingProvider ? `
-                        <div class="logistics-detail">
-                            <strong>Shipping Provider:</strong>
-                            <span>${shippingProvider}</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('');
         }
 
         // Load Routes
