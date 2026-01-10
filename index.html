@@ -1840,18 +1840,43 @@
             // Get the first record (assuming single event)
             const event = data.records[0].fields;
 
-            // Format date range
+            // Format date range (avoid timezone issues by parsing date strings directly)
             let dateDisplay = 'TBD';
             if (event['Event Start Date'] && event['Event End Date']) {
-                const startDate = new Date(event['Event Start Date']);
-                const endDate = new Date(event['Event End Date']);
+                // Parse dates avoiding timezone conversion
+                const parseDate = (dateStr) => {
+                    // Handle both YYYY-MM-DD format and Date objects
+                    if (typeof dateStr === 'string') {
+                        const parts = dateStr.split('-');
+                        if (parts.length === 3) {
+                            return {
+                                year: parseInt(parts[0], 10),
+                                month: parseInt(parts[1], 10) - 1, // JS months are 0-indexed
+                                day: parseInt(parts[2], 10)
+                            };
+                        }
+                    }
+                    // Fallback to Date object parsing
+                    const d = new Date(dateStr);
+                    return {
+                        year: d.getUTCFullYear(),
+                        month: d.getUTCMonth(),
+                        day: d.getUTCDate()
+                    };
+                };
+
+                const start = parseDate(event['Event Start Date']);
+                const end = parseDate(event['Event End Date']);
+                
+                const startDate = new Date(start.year, start.month, start.day);
+                const endDate = new Date(end.year, end.month, end.day);
                 
                 // Format: "April 20-24, 2026" or "April 20 - May 2, 2026"
                 const startMonth = startDate.toLocaleDateString('en-US', { month: 'long' });
-                const startDay = startDate.getDate();
+                const startDay = start.day;
                 const endMonth = endDate.toLocaleDateString('en-US', { month: 'long' });
-                const endDay = endDate.getDate();
-                const year = startDate.getFullYear();
+                const endDay = end.day;
+                const year = start.year;
 
                 if (startMonth === endMonth) {
                     dateDisplay = `${startMonth} ${startDay}-${endDay}, ${year}`;
@@ -1859,7 +1884,26 @@
                     dateDisplay = `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
                 }
             } else if (event['Event Start Date']) {
-                const startDate = new Date(event['Event Start Date']);
+                const parseDate = (dateStr) => {
+                    if (typeof dateStr === 'string') {
+                        const parts = dateStr.split('-');
+                        if (parts.length === 3) {
+                            return {
+                                year: parseInt(parts[0], 10),
+                                month: parseInt(parts[1], 10) - 1,
+                                day: parseInt(parts[2], 10)
+                            };
+                        }
+                    }
+                    const d = new Date(dateStr);
+                    return {
+                        year: d.getUTCFullYear(),
+                        month: d.getUTCMonth(),
+                        day: d.getUTCDate()
+                    };
+                };
+                const start = parseDate(event['Event Start Date']);
+                const startDate = new Date(start.year, start.month, start.day);
                 dateDisplay = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
             }
 
