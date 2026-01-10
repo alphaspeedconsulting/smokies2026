@@ -14,24 +14,34 @@ A beautiful, responsive dashboard for managing the Smokies 2026 car event, power
 
 ## Setup
 
-### 1. Environment Configuration
+### For Local Development
 
-Create a `.env` file in the project root:
+1. **Create `.env` file** in the project root:
+   ```bash
+   AIRTABLE_PAT=your_personal_access_token_here
+   AIRTABLE_BASE_ID=your_base_id_here
+   ```
 
-```bash
-AIRTABLE_PAT=your_personal_access_token_here
-AIRTABLE_BASE_ID=your_base_id_here
-```
+2. **Generate env-config.js**:
+   ```bash
+   node generate-env-config.js
+   ```
 
-### 2. Generate env-config.js
+3. **Open in browser** or use a local server:
+   ```bash
+   python3 -m http.server 8000
+   ```
 
-Run the script to generate `env-config.js` from your `.env` file:
+### For GitHub Pages Deployment
 
-```bash
-node generate-env-config.js
-```
+**See [SECRETS_SETUP.md](./SECRETS_SETUP.md) for complete instructions.**
 
-This creates `env-config.js` which is loaded by the HTML file. **Do not commit `env-config.js` or `.env` to version control** - they contain sensitive credentials.
+Quick steps:
+1. Add secrets to GitHub: `AIRTABLE_PAT` and `AIRTABLE_BASE_ID`
+2. Enable GitHub Pages (Settings → Pages → Source: GitHub Actions)
+3. Push to `main` branch - deployment happens automatically!
+
+**Important:** Credentials are stored securely in GitHub Secrets and never committed to the repository.
 
 ### 3. Local Development
 
@@ -49,19 +59,22 @@ Then visit `http://localhost:8000/index-integrated.html`
 
 ## Deployment
 
-### GitHub Pages
+### GitHub Pages (Secure)
 
-See [GITHUB_PAGES_SETUP.md](./GITHUB_PAGES_SETUP.md) for detailed instructions.
+**See [SECRETS_SETUP.md](./SECRETS_SETUP.md) for complete setup instructions.**
 
-**Important:** Before deploying to GitHub Pages:
-1. Generate `env-config.js` from your `.env` file
-2. Commit `env-config.js` (it will be public)
-3. **Do NOT commit `.env`** (add it to `.gitignore`)
+The repository uses GitHub Actions to securely deploy:
+- ✅ Credentials stored in GitHub Secrets (never in code)
+- ✅ Automatically generates `env-config.js` during deployment
+- ✅ Deploys on every push to `main` branch
+- ✅ No credentials exposed in repository
 
-⚠️ **Security Note:** Since GitHub Pages repositories are public, your Airtable PAT will be visible in `env-config.js`. Consider:
-- Using a PAT with read-only permissions
-- Rotating your PAT regularly
-- Using GitHub Secrets with a build process (advanced)
+**Quick Setup:**
+1. Add secrets: `AIRTABLE_PAT` and `AIRTABLE_BASE_ID` in repository Settings
+2. Enable GitHub Pages: Settings → Pages → Source: GitHub Actions
+3. Push to `main` - deployment happens automatically!
+
+Your site will be live at: `https://alphaspeedconsulting.github.io/smokies2026/`
 
 ## File Structure
 
