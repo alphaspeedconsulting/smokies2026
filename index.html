@@ -2167,11 +2167,21 @@
                     dateDisplay = formatDate(checkIn);
                 }
                 
-                // Make website clickable
+                // Make website clickable - extract URL from name if it's in the name field
                 let websiteDisplay = '';
-                if (website) {
+                let accommodationName = name;
+                
+                // Check if website URL is embedded in the name field
+                const urlMatch = name.match(/(https?:\/\/[^\s]+)/);
+                if (urlMatch) {
+                    const urlInName = urlMatch[1];
+                    accommodationName = name.replace(urlInName, '').trim().replace(/^[•\s]+/, '');
+                    const websiteUrl = urlInName;
+                    const websiteText = websiteUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+                    websiteDisplay = `<span class="info-value link" onclick="window.open('${websiteUrl}', '_blank')">${websiteText}</span>`;
+                } else if (website) {
                     const websiteUrl = website.startsWith('http') ? website : `https://${website}`;
-                    const websiteText = website.replace(/^https?:\/\//, '').replace(/^www\./, '');
+                    const websiteText = website.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
                     websiteDisplay = `<span class="info-value link" onclick="window.open('${websiteUrl}', '_blank')">${websiteText}</span>`;
                 } else {
                     websiteDisplay = '<span class="info-value">-</span>';
@@ -2185,7 +2195,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">Accommodation</span>
-                            <span class="info-value">${name}${type ? ` • ${type}` : ''}</span>
+                            <span class="info-value">${accommodationName}${type ? ` • ${type}` : ''}</span>
                         </div>
                         ${dateDisplay ? `
                         <div class="info-row">
