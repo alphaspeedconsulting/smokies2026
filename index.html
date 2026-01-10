@@ -1,0 +1,2669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smokies 2026 - Event Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Environment configuration -->
+    <script src="env-config.js"></script>
+    <style>
+        :root {
+            --teal: #14b8a6;
+            --teal-dark: #0d9488;
+            --teal-light: #5eead4;
+            --grey-50: #f9fafb;
+            --grey-100: #f3f4f6;
+            --grey-200: #e5e7eb;
+            --grey-300: #d1d5db;
+            --grey-400: #9ca3af;
+            --grey-500: #6b7280;
+            --grey-600: #4b5563;
+            --grey-700: #374151;
+            --grey-800: #1f2937;
+            --grey-900: #111827;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--grey-50);
+            color: var(--grey-900);
+            line-height: 1.6;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            border-right: none;
+            padding: 40px 0;
+            z-index: 100;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 50px;
+            padding: 0 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--teal-light);
+            font-weight: 800;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+            padding: 0 20px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: var(--teal);
+            border-radius: 0 2px 2px 0;
+            transition: height 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.95);
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: rgba(20, 184, 166, 0.15);
+            color: var(--teal-light);
+            font-weight: 600;
+        }
+
+        .nav-link.active::before {
+            height: 60%;
+        }
+
+        .nav-icon {
+            display: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px 40px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--grey-900);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .breadcrumb {
+            color: var(--grey-500);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--grey-500);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--teal);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none !important;
+        }
+
+        .content-section.active {
+            display: block !important;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--grey-200);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--grey-900);
+        }
+
+        .card-badge {
+            background: var(--grey-100);
+            color: var(--grey-700);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .card-badge.teal {
+            background: rgba(20, 184, 166, 0.1);
+            color: var(--teal);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--grey-100);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--grey-600);
+            font-size: 0.95rem;
+        }
+
+        .info-value {
+            color: var(--grey-900);
+            font-weight: 500;
+        }
+
+        .info-value.link {
+            color: var(--teal);
+            cursor: pointer;
+        }
+
+        .info-value.link:hover {
+            text-decoration: underline;
+        }
+
+        /* Lists */
+        .attendees-list, .routes-list, .accommodations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .attendee-item, .route-item, .accommodation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--white);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .attendee-item:hover, .route-item:hover, .accommodation-item:hover {
+            border-color: var(--teal);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .attendee-item.editing, .route-item.editing, .accommodation-item.editing,
+        .logistics-card.editing, .schedule-item.editing {
+            border-color: var(--teal);
+            box-shadow: var(--shadow-md);
+            background: rgba(20, 184, 166, 0.02);
+        }
+
+        .inline-edit {
+            display: none;
+        }
+
+        .item-editing .inline-view {
+            display: none;
+        }
+
+        .item-editing .inline-edit {
+            display: block;
+        }
+
+        .inline-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--teal);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: 'Sora', sans-serif;
+            margin-bottom: 8px;
+        }
+
+        .inline-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .inline-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-inline {
+            padding: 6px 16px;
+            font-size: 0.85rem;
+        }
+
+        /* Filtering & Search */
+        .filters-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid var(--grey-300);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Sora', sans-serif;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--grey-400);
+            font-size: 1.1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid var(--grey-300);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Sora', sans-serif;
+            background: var(--white);
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .filter-label {
+            color: var(--grey-600);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .clear-filters {
+            padding: 12px 20px;
+            background: var(--grey-100);
+            color: var(--grey-700);
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-filters:hover {
+            background: var(--grey-200);
+        }
+
+        .attendee-info, .route-info, .accommodation-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex: 1;
+        }
+
+        .attendee-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .attendee-details, .route-details, .accommodation-details {
+            flex: 1;
+        }
+
+        .attendee-name, .route-name, .accommodation-name {
+            font-weight: 600;
+            color: var(--grey-900);
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .attendee-car, .route-date, .accommodation-type {
+            color: var(--grey-600);
+            font-size: 0.9rem;
+        }
+
+        .attendee-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: rgba(20, 184, 166, 0.1);
+            color: var(--teal);
+        }
+
+        /* Logistics */
+        .logistics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .logistics-card {
+            background: var(--white);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            padding: 25px;
+            border-left: 4px solid var(--teal);
+        }
+
+        .logistics-vehicle {
+            font-weight: 600;
+            color: var(--grey-900);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .logistics-detail {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: var(--grey-600);
+            font-size: 0.95rem;
+        }
+
+        .logistics-detail strong {
+            color: var(--grey-900);
+            min-width: 140px;
+        }
+
+        /* Schedule */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .schedule-item {
+            background: var(--white);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            padding: 25px;
+            transition: all 0.2s ease;
+        }
+
+        .schedule-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .schedule-date {
+            font-weight: 700;
+            color: var(--teal);
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .schedule-time {
+            color: var(--grey-500);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .schedule-title {
+            font-weight: 600;
+            color: var(--grey-900);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .schedule-description {
+            color: var(--grey-600);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--grey-600);
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Sora', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--teal);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--teal-dark);
+        }
+
+        .btn-secondary {
+            background: var(--grey-100);
+            color: var(--grey-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--grey-200);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--grey-900);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--grey-500);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .modal-close:hover {
+            background: var(--grey-100);
+            color: var(--grey-900);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--grey-700);
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: #dc2626;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--grey-300);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Sora', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select[multiple] {
+            min-height: 120px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+
+        .form-error {
+            color: #dc2626;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* Loading and Error States */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--grey-500);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--grey-200);
+            border-top-color: var(--teal);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            color: #dc2626;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: rgba(20, 184, 166, 0.1);
+            border: 1px solid rgba(20, 184, 166, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            color: var(--teal-dark);
+            margin: 20px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--grey-500);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        /* Banner Image */
+        .event-banner {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            object-position: center 25%;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border: 2px solid var(--grey-100);
+        }
+
+        .banner-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 40px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .banner-title {
+            color: var(--white);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .banner-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+        }
+
+        .section-banner {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            object-position: center 55%;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border: 2px solid var(--grey-100);
+            display: block;
+        }
+        
+        /* Specific positioning to show cars prominently - cars typically in lower 2/3 of image */
+        #attendees .section-banner {
+            object-position: center 60%;
+        }
+        
+        #logistics .section-banner {
+            object-position: center 55%;
+        }
+        
+        #routes .section-banner {
+            object-position: center 50%;
+        }
+        
+        #schedule .section-banner {
+            object-position: center 60%;
+        }
+        
+        #accommodations .section-banner {
+            object-position: center 50%;
+        }
+
+        /* Scrollbar styling for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Photo Gallery Styles */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--white);
+            aspect-ratio: 4/3;
+            height: 250px;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 16px;
+            color: var(--white);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-item-overlay {
+            opacity: 1;
+        }
+
+        .gallery-item-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .gallery-item-filename {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* Lightbox Modal */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: var(--white);
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10001;
+            transition: color 0.3s ease;
+        }
+
+        .lightbox-close:hover {
+            color: var(--teal-light);
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: none;
+            padding: 20px 16px;
+            cursor: pointer;
+            font-size: 24px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .lightbox-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .lightbox-prev {
+            left: 20px;
+        }
+
+        .lightbox-next {
+            right: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">Smokies <span>2026</span></div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link active" data-section="event-details">
+                    Event Details
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-section="attendees">
+                    Attendees
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-section="logistics">
+                    Logistics
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-section="routes">
+                    Routes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-section="schedule">
+                    Schedule
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-section="accommodations">
+                    Accommodations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-section="gallery">
+                    Photo Gallery
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Event Details Section -->
+        <div id="event-details" class="content-section active">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Event Details</h1>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> / Event Details
+                    </div>
+                </div>
+                <a href="https://airtable.com/appQygVLH6YLcLRJM/pagZxwo1ZVx6XDCWb/form?isForm=true" target="_blank" class="btn btn-primary" style="font-size: 1.1rem; padding: 14px 28px; text-decoration: none; display: inline-block;">
+                    Register Now
+                </a>
+            </div>
+
+            <!-- Banner Image -->
+            <div class="banner-container">
+                <img src="images/IMG_0898.jpeg" 
+                     alt="Corvettes driving on winding mountain road through autumn foliage" 
+                     class="event-banner">
+                <div class="banner-overlay">
+                    <div class="banner-title">Smokies 2026</div>
+                    <div class="banner-subtitle">An Exclusive Driving Experience Through the Great Smoky Mountains</div>
+                </div>
+            </div>
+
+
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Event Information</h3>
+                        <span class="card-badge teal">Confirmed</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Location</span>
+                        <span class="info-value">Tapoco Lodge</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Region</span>
+                        <span class="info-value">Great Smoky Mountains, TN</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Date</span>
+                        <span class="info-value">2026</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Website</span>
+                        <span class="info-value link" onclick="window.open('https://www.tapoco.com/', '_blank')">tapoco.com</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">About The Event</h3>
+                    </div>
+                    <p style="color: var(--grey-600); line-height: 1.7;">
+                        Smokies 2026 is an exclusive driving event bringing together automotive enthusiasts for an unforgettable experience through the Great Smoky Mountains. This curated gathering features world-class vehicles, scenic mountain routes, and luxury accommodations at the historic Tapoco Lodge.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendees Section -->
+        <div id="attendees" class="content-section">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Attendees</h1>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> / Attendees
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Banner -->
+            <img src="images/IMG_1905.jpeg" 
+                 alt="Sports cars including Lamborghini and Corvettes at car show gathering" 
+                 class="section-banner">
+
+            <div class="filters-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="attendee-search" class="search-input" placeholder="Search attendees by name..." oninput="filterAttendees()">
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Status:</span>
+                    <select id="attendee-status-filter" class="filter-select" onchange="filterAttendees()">
+                        <option value="">All</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Arrival:</span>
+                    <select id="attendee-arrival-filter" class="filter-select" onchange="filterAttendees()">
+                        <option value="">All</option>
+                        <option value="Drive">Drive</option>
+                        <option value="Ship">Ship</option>
+                        <option value="Fly">Fly</option>
+                    </select>
+                </div>
+                <button class="clear-filters" onclick="clearAttendeeFilters()">Clear Filters</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Confirmed Attendees</h3>
+                    <span class="card-badge" id="attendee-count">Loading...</span>
+                </div>
+                <div id="attendees-list" class="attendees-list">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading attendees...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logistics Section -->
+        <div id="logistics" class="content-section">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Logistics</h1>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> / Logistics
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Banner -->
+            <img src="images/IMG_3069.jpeg" 
+                 alt="Line of Porsches and sports cars parked at car meet" 
+                 class="section-banner">
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <span class="filter-label">Transport Method:</span>
+                    <select id="vehicle-transport-filter" class="filter-select" onchange="filterVehicles()">
+                        <option value="">All</option>
+                        <option value="Driven">Driven</option>
+                        <option value="Shipped">Shipped</option>
+                    </select>
+                </div>
+                <button class="clear-filters" onclick="clearVehicleFilters()">Clear Filters</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Vehicles & Transportation</h3>
+                    <span class="card-badge" id="logistics-count">Loading...</span>
+                </div>
+                <div id="logistics-list" class="logistics-list">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading logistics information...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Routes Section -->
+        <div id="routes" class="content-section">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Routes</h1>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> / Routes
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Banner -->
+            <img src="images/IMG_6473.jpeg" 
+                 alt="Sports cars on winding mountain road through autumn foliage" 
+                 class="section-banner">
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Driving Routes</h3>
+                    <span class="card-badge" id="routes-count">Loading...</span>
+                </div>
+                <div id="routes-list" class="routes-list">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading routes...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Section -->
+        <div id="schedule" class="content-section">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Schedule</h1>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> / Schedule
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Banner -->
+            <img src="images/IMG_7496.jpeg" 
+                 alt="Porsches and sports cars at outdoor car gathering" 
+                 class="section-banner">
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <span class="filter-label">Event Type:</span>
+                    <select id="schedule-type-filter" class="filter-select" onchange="filterSchedule()">
+                        <option value="">All</option>
+                        <option value="Dinner">Dinner</option>
+                        <option value="Drive">Drive</option>
+                        <option value="Hotel Check-in">Hotel Check-in</option>
+                        <option value="Meetup">Meetup</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button class="clear-filters" onclick="clearScheduleFilters()">Clear Filters</button>
+            </div>
+
+            <div id="schedule-list" class="schedule-grid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Loading schedule...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accommodations Section -->
+        <div id="accommodations" class="content-section">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Accommodations</h1>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> / Accommodations
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Banner -->
+            <img src="images/IMG_0898.jpeg" 
+                 alt="Scenic mountain road with autumn foliage" 
+                 class="section-banner">
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Accommodations</h3>
+                    <span class="card-badge" id="accommodations-count">Loading...</span>
+                </div>
+                <div id="accommodations-list" class="accommodations-list">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading accommodations...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Gallery Section -->
+        <div id="gallery" class="content-section">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Photo Gallery</h1>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> / Photo Gallery
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Event Photos</h3>
+                    <span class="card-badge" id="gallery-count">Loading...</span>
+                </div>
+                <div id="gallery-grid" class="gallery-grid">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading gallery...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lightbox Modal -->
+        <div id="lightbox" class="lightbox">
+            <span class="lightbox-close">&times;</span>
+            <button class="lightbox-nav lightbox-prev">&#8249;</button>
+            <img id="lightbox-image" class="lightbox-content" src="" alt="">
+            <button class="lightbox-nav lightbox-next">&#8250;</button>
+        </div>
+    </main>
+
+    <!-- Registration Form Modal -->
+    <div id="registration-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Register for Smokies 2026</h2>
+                <button class="modal-close" onclick="closeRegistrationForm()">×</button>
+            </div>
+            <form id="registration-form" onsubmit="handleRegistrationSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label required">Full Name</label>
+                    <input type="text" name="Attendee Name" class="form-input" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="Email" class="form-input" placeholder="your.email@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" name="Phone" class="form-input" placeholder="(555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Arrival Date</label>
+                    <input type="date" name="Arrival Date" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Departure Date</label>
+                    <input type="date" name="Departure Date" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Arrival Method</label>
+                    <select name="Arrival Method" class="form-select">
+                        <option value="">Select...</option>
+                        <option value="Drive">Drive</option>
+                        <option value="Ship">Ship</option>
+                        <option value="Fly">Fly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vehicle Details</label>
+                    <input type="text" name="Vehicle Details" class="form-input" placeholder="Make, model, year, color">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea name="Notes" class="form-textarea" placeholder="Any additional information or special requests..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeRegistrationForm()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Registration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Loaded from env-config.js (generated from .env file)
+        let AIRTABLE_TOKEN = null;
+        let BASE_ID = null;
+        let ATTENDEES_CACHE = []; // Cache for dropdowns
+        let ALL_RECORDS = {
+            attendees: [],
+            vehicles: [],
+            routes: [],
+            schedule: [],
+            accommodations: []
+        }; // Store all records for filtering
+        const TABLES = {
+            ATTENDEES: 'Attendees',
+            VEHICLES: 'Vehicles',
+            ROUTES: 'Routes',
+            SCHEDULE: 'Schedule',
+            ACCOMMODATIONS: 'Accommodations'
+        };
+
+        // Navigation - Initialize after DOM is ready
+        function initNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active nav link
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Get section ID
+                    const sectionId = this.getAttribute('data-section');
+                    if (!sectionId) {
+                        console.error('No data-section attribute found');
+                        return;
+                    }
+                    
+                    // Hide all sections
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    // Show selected section
+                    const targetSection = document.getElementById(sectionId);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    } else {
+                        console.error(`Section with id "${sectionId}" not found`);
+                    }
+                });
+            });
+        }
+        
+        // Initialize navigation when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNavigation);
+        } else {
+            initNavigation();
+        }
+
+        // Config panel removed - using embedded credentials
+
+        // Load saved config on page load
+        function initPage() {
+            // Check if credentials are pre-configured
+            if (AIRTABLE_TOKEN && BASE_ID) {
+                const tokenInput = document.getElementById('api-token');
+                const baseInput = document.getElementById('base-id');
+                if (tokenInput) tokenInput.value = AIRTABLE_TOKEN;
+                if (baseInput) baseInput.value = BASE_ID;
+                localStorage.setItem('airtable_token', AIRTABLE_TOKEN);
+                localStorage.setItem('base_id', BASE_ID);
+                loadAllData();
+                return;
+            }
+            
+            // Load from environment config (env-config.js generated from .env)
+            if (window.ENV && window.ENV.AIRTABLE_PAT && window.ENV.AIRTABLE_BASE_ID) {
+                AIRTABLE_TOKEN = window.ENV.AIRTABLE_PAT;
+                BASE_ID = window.ENV.AIRTABLE_BASE_ID;
+                loadAllData();
+                return;
+            }
+            
+            // Fall back to localStorage if available (for development/testing)
+            const savedToken = localStorage.getItem('airtable_token');
+            const savedBaseId = localStorage.getItem('base_id');
+
+            if (savedToken && savedBaseId) {
+                AIRTABLE_TOKEN = savedToken;
+                BASE_ID = savedBaseId;
+                loadAllData();
+            } else {
+                console.error('Airtable credentials not found. Please ensure env-config.js exists and is generated from .env file.');
+            }
+        }
+        
+        // Initialize page when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+            document.addEventListener('DOMContentLoaded', initLightbox);
+        } else {
+            initPage();
+            initLightbox();
+        }
+
+        // Initialize Lightbox
+        function initLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxClose = document.querySelector('.lightbox-close');
+            const lightboxPrev = document.querySelector('.lightbox-prev');
+            const lightboxNext = document.querySelector('.lightbox-next');
+
+            if (lightboxClose) {
+                lightboxClose.addEventListener('click', closeLightbox);
+            }
+
+            if (lightboxPrev) {
+                lightboxPrev.addEventListener('click', () => navigateLightbox(-1));
+            }
+
+            if (lightboxNext) {
+                lightboxNext.addEventListener('click', () => navigateLightbox(1));
+            }
+
+            if (lightbox) {
+                lightbox.addEventListener('click', function(e) {
+                    if (e.target === lightbox) {
+                        closeLightbox();
+                    }
+                });
+            }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (lightbox && lightbox.classList.contains('active')) {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    } else if (e.key === 'ArrowLeft') {
+                        navigateLightbox(-1);
+                    } else if (e.key === 'ArrowRight') {
+                        navigateLightbox(1);
+                    }
+                }
+            });
+        }
+
+        // Airtable API functions
+        async function fetchAirtableData(tableName, params = {}) {
+            if (!AIRTABLE_TOKEN || !BASE_ID) {
+                console.warn('Airtable not configured - please enter credentials');
+                return { error: 'Airtable configuration error. Please check credentials.' };
+            }
+
+            try {
+                // URL encode table name in case it has spaces
+                const encodedTableName = encodeURIComponent(tableName);
+                const url = new URL(`https://api.airtable.com/v0/${BASE_ID}/${encodedTableName}`);
+                Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || response.statusText;
+                    console.error(`Airtable API Error (${response.status}):`, errorMsg);
+                    throw new Error(`HTTP ${response.status}: ${errorMsg}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching Airtable data:', error);
+                return { error: error.message };
+            }
+        }
+
+        async function createAirtableRecord(tableName, fields) {
+            if (!AIRTABLE_TOKEN || !BASE_ID) {
+                return { error: 'Configuration required' };
+            }
+
+            try {
+                const response = await fetch(
+                    `https://api.airtable.com/v0/${BASE_ID}/${tableName}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            records: [{ fields }]
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error creating record:', error);
+                return { error: error.message };
+            }
+        }
+
+        async function updateAirtableRecord(tableName, recordId, fields) {
+            if (!AIRTABLE_TOKEN || !BASE_ID) {
+                return { error: 'Configuration required' };
+            }
+
+            try {
+                const response = await fetch(
+                    `https://api.airtable.com/v0/${BASE_ID}/${tableName}/${recordId}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ fields })
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error updating record:', error);
+                return { error: error.message };
+            }
+        }
+
+        // Helper: Format linked records for display
+        function formatLinkedRecords(linkedRecords) {
+            if (!linkedRecords || !Array.isArray(linkedRecords)) return 'None';
+            if (linkedRecords.length === 0) return 'None';
+            // If it's an array of objects with name property
+            if (linkedRecords[0] && typeof linkedRecords[0] === 'object') {
+                return linkedRecords.map(r => r.name || r.id).join(', ');
+            }
+            // If it's just IDs, we'd need to fetch names (simplified for now)
+            return `${linkedRecords.length} linked`;
+        }
+
+        // Helper: Get initials from name
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        // Helper: Format date
+        function formatDate(dateStr) {
+            if (!dateStr) return 'TBD';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        // Load all data
+        async function loadAllData() {
+            await Promise.all([
+                loadAttendees(),
+                loadLogistics(),
+                loadRoutes(),
+                loadSchedule(),
+                loadAccommodations(),
+                loadGallery()
+            ]);
+        }
+
+        // Load Attendees
+        async function loadAttendees() {
+            const container = document.getElementById('attendees-list');
+            const countBadge = document.getElementById('attendee-count');
+            const statElement = document.getElementById('stat-attendees');
+            const data = await fetchAirtableData(TABLES.ATTENDEES);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error">Error loading attendees: ${data.error}</div>`;
+                countBadge.textContent = 'Error';
+                return;
+            }
+
+            if (!data.records || data.records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <div>No attendees found. Add your first attendee!</div>
+                    </div>
+                `;
+                countBadge.textContent = '0';
+                if (statElement) statElement.textContent = '0';
+                return;
+            }
+
+            ATTENDEES_CACHE = data.records; // Cache for dropdowns
+            countBadge.textContent = data.records.length;
+            if (statElement) statElement.textContent = data.records.length;
+
+            ALL_RECORDS.attendees = data.records; // Store for filtering
+            
+            container.innerHTML = data.records.map(record => {
+                const fields = record.fields;
+                const name = fields['Attendee Name'] || 'Unknown';
+                const status = fields['Status'] || 'Pending';
+                const arrivalMethod = Array.isArray(fields['Arrival Method']) 
+                    ? fields['Arrival Method'].join(', ') 
+                    : (fields['Arrival Method'] || 'TBD');
+                const vehicleInfo = fields['Vehicles'] ? formatLinkedRecords(fields['Vehicles']) : 'No vehicle';
+
+                return `
+                    <div class="attendee-item" data-record-id="${record.id}" data-status="${status}" data-arrival="${arrivalMethod}">
+                        <div class="attendee-info">
+                            <div class="attendee-avatar">${getInitials(name)}</div>
+                            <div class="attendee-details" style="flex: 1;">
+                                <div class="attendee-name">${name}</div>
+                                <div class="attendee-car">${arrivalMethod} • ${vehicleInfo}</div>
+                            </div>
+                        </div>
+                        <span class="attendee-status">${status}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load Logistics (Vehicles)
+        async function loadLogistics() {
+            const container = document.getElementById('logistics-list');
+            const countBadge = document.getElementById('logistics-count');
+            const statElement = document.getElementById('stat-vehicles');
+            const data = await fetchAirtableData(TABLES.VEHICLES);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error">Error loading logistics: ${data.error}</div>`;
+                countBadge.textContent = 'Error';
+                return;
+            }
+
+            if (!data.records || data.records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🚗</div>
+                        <div>No vehicles found. Add your first vehicle!</div>
+                    </div>
+                `;
+                countBadge.textContent = '0';
+                if (statElement) statElement.textContent = '0';
+                return;
+            }
+
+            countBadge.textContent = data.records.length;
+            if (statElement) statElement.textContent = data.records.length;
+
+            ALL_RECORDS.vehicles = data.records; // Store for filtering
+            
+            container.innerHTML = data.records.map(record => {
+                const fields = record.fields;
+                const carDetails = fields['Car Details'] || fields['Car Number'] || 'Vehicle';
+                const attendees = fields['Attendees'] ? formatLinkedRecords(fields['Attendees']) : 'TBD';
+                const transportMethod = fields['Transport Method'] || 'TBD';
+                const shippingProvider = fields['Shipping Provider'] || '';
+
+                return `
+                    <div class="logistics-card" data-record-id="${record.id}" data-transport="${transportMethod}">
+                        <div class="logistics-vehicle">${carDetails}</div>
+                        <div class="logistics-detail">
+                            <strong>Owner(s):</strong>
+                            <span>${attendees}</span>
+                        </div>
+                        <div class="logistics-detail">
+                            <strong>Transport Method:</strong>
+                            <span>${transportMethod}</span>
+                        </div>
+                        ${shippingProvider ? `
+                        <div class="logistics-detail">
+                            <strong>Shipping Provider:</strong>
+                            <span>${shippingProvider}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load Routes
+        async function loadRoutes() {
+            const container = document.getElementById('routes-list');
+            const countBadge = document.getElementById('routes-count');
+            const statElement = document.getElementById('stat-routes');
+            const data = await fetchAirtableData(TABLES.ROUTES);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error">Error loading routes: ${data.error}</div>`;
+                countBadge.textContent = 'Error';
+                return;
+            }
+
+            if (!data.records || data.records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🗺️</div>
+                        <div>No routes found. Add your first route!</div>
+                    </div>
+                `;
+                countBadge.textContent = '0';
+                if (statElement) statElement.textContent = '0';
+                return;
+            }
+
+            countBadge.textContent = data.records.length;
+            if (statElement) statElement.textContent = data.records.length;
+
+            container.innerHTML = data.records.map(record => {
+                const fields = record.fields;
+                const routeName = fields['Route Name'] || 'Unnamed Route';
+                const date = formatDate(fields['Date']);
+                const startLocation = fields['Start Location'] || 'TBD';
+                const endLocation = fields['End Location'] || 'TBD';
+                const mapLink = fields['Map Link'] || '';
+
+                return `
+                    <div class="route-item">
+                        <div class="route-info">
+                            <div class="route-details">
+                                <div class="route-name">${routeName}</div>
+                                <div class="route-date">${date} • ${startLocation} → ${endLocation}</div>
+                            </div>
+                        </div>
+                        ${mapLink ? `<a href="${mapLink}" target="_blank" class="btn btn-secondary btn-small">View Map</a>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load Schedule
+        async function loadSchedule() {
+            const container = document.getElementById('schedule-list');
+            const data = await fetchAirtableData(TABLES.SCHEDULE);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error">Error loading schedule: ${data.error}</div>`;
+                return;
+            }
+
+            if (!data.records || data.records.length === 0) {
+                container.innerHTML = `
+                    <div class="schedule-item">
+                        <div class="schedule-date">TBD</div>
+                        <div class="schedule-title">Schedule Coming Soon</div>
+                        <div class="schedule-description">
+                            Event schedule will be updated closer to the event date.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            ALL_RECORDS.schedule = data.records; // Store for filtering
+            
+            container.innerHTML = data.records.map(record => {
+                const fields = record.fields;
+                const eventName = fields['Event Name'] || 'Event';
+                const eventType = fields['Event Type'] || '';
+                const date = formatDate(fields['Date']);
+                const time = fields['Time'] || '';
+                const location = fields['Location'] || '';
+                const notes = fields['Notes'] || '';
+
+                return `
+                    <div class="schedule-item" data-record-id="${record.id}" data-event-type="${eventType}">
+                        <div class="schedule-date">${date}</div>
+                        <div class="schedule-time">${time}${location ? ` • ${location}` : ''}</div>
+                        <div class="schedule-title">${eventName}${eventType ? ` (${eventType})` : ''}</div>
+                        ${notes ? `<div class="schedule-description">${notes}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load Accommodations
+        async function loadAccommodations() {
+            const container = document.getElementById('accommodations-list');
+            const countBadge = document.getElementById('accommodations-count');
+            const statElement = document.getElementById('stat-accommodations');
+            const data = await fetchAirtableData(TABLES.ACCOMMODATIONS);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error">Error loading accommodations: ${data.error}</div>`;
+                countBadge.textContent = 'Error';
+                return;
+            }
+
+            if (!data.records || data.records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏨</div>
+                        <div>No accommodations found. Add your first accommodation!</div>
+                    </div>
+                `;
+                countBadge.textContent = '0';
+                if (statElement) statElement.textContent = '0';
+                return;
+            }
+
+            countBadge.textContent = data.records.length;
+            if (statElement) statElement.textContent = data.records.length;
+
+            container.innerHTML = data.records.map(record => {
+                const fields = record.fields;
+                const name = fields['Accommodation Name'] || 'Unnamed';
+                const type = fields['Accommodation Type'] || '';
+                const checkIn = formatDate(fields['Check-in Date']);
+                const checkOut = formatDate(fields['Check-out Date']);
+
+                return `
+                    <div class="accommodation-item">
+                        <div class="accommodation-info">
+                            <div class="accommodation-details">
+                                <div class="accommodation-name">${name}</div>
+                                <div class="accommodation-type">${type} • ${checkIn} - ${checkOut}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load Photo Gallery
+        async function loadGallery() {
+            const container = document.getElementById('gallery-grid');
+            const countBadge = document.getElementById('gallery-count');
+            
+            if (!container) return;
+
+            // List of all gallery images
+            const galleryImages = [
+                { src: 'images/6154c0dd-ee2f-4e47-8c98-6d864e4c8493.jpeg', title: 'Event Photo 1', filename: '6154c0dd-ee2f-4e47-8c98-6d864e4c8493.jpeg' },
+                { src: 'images/7d92777f-c92e-4e65-b849-086ca1632baa.jpeg', title: 'Event Photo 2', filename: '7d92777f-c92e-4e65-b849-086ca1632baa.jpeg' },
+                { src: 'images/IMG_0255.jpeg', title: 'Event Photo 3', filename: 'IMG_0255.jpeg' },
+                { src: 'images/IMG_0898.jpeg', title: 'Scenic Mountain Road', filename: 'IMG_0898.jpeg' },
+                { src: 'images/IMG_1905.jpeg', title: 'Car Show Gathering', filename: 'IMG_1905.jpeg' },
+                { src: 'images/IMG_3069.jpeg', title: 'Parked Sports Cars', filename: 'IMG_3069.jpeg' },
+                { src: 'images/IMG_3187.jpeg', title: 'Sports Cars Display', filename: 'IMG_3187.jpeg' },
+                { src: 'images/IMG_6456.jpeg', title: 'Mountain Drive', filename: 'IMG_6456.jpeg' },
+                { src: 'images/IMG_6473.jpeg', title: 'Scenic Route', filename: 'IMG_6473.jpeg' },
+                { src: 'images/IMG_6706.jpeg', title: 'Event Banner', filename: 'IMG_6706.jpeg' },
+                { src: 'images/IMG_6710.jpeg', title: 'Porsche Lineup', filename: 'IMG_6710.jpeg' },
+                { src: 'images/IMG_7496.jpeg', title: 'Car Gathering', filename: 'IMG_7496.jpeg' },
+                { src: 'images/IMG_8214.jpeg', title: 'Outdoor Event', filename: 'IMG_8214.jpeg' }
+            ];
+
+            countBadge.textContent = galleryImages.length;
+
+            container.innerHTML = galleryImages.map((img, index) => `
+                <div class="gallery-item" onclick="openLightbox(${index})">
+                    <img src="${img.src}" alt="${img.title}" loading="lazy">
+                    <div class="gallery-item-overlay">
+                        <div class="gallery-item-title">${img.title}</div>
+                        <div class="gallery-item-filename">${img.filename}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Store images globally for lightbox navigation
+            window.galleryImages = galleryImages;
+        }
+
+        // Lightbox functionality
+        let currentLightboxIndex = 0;
+
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightbox-image');
+            
+            if (window.galleryImages && window.galleryImages[index]) {
+                lightboxImage.src = window.galleryImages[index].src;
+                lightboxImage.alt = window.galleryImages[index].title;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function navigateLightbox(direction) {
+            if (!window.galleryImages) return;
+            
+            currentLightboxIndex += direction;
+            
+            if (currentLightboxIndex < 0) {
+                currentLightboxIndex = window.galleryImages.length - 1;
+            } else if (currentLightboxIndex >= window.galleryImages.length) {
+                currentLightboxIndex = 0;
+            }
+            
+            const lightboxImage = document.getElementById('lightbox-image');
+            lightboxImage.src = window.galleryImages[currentLightboxIndex].src;
+            lightboxImage.alt = window.galleryImages[currentLightboxIndex].title;
+        }
+
+        // Form handling
+        let currentFormType = null;
+        let currentRecordId = null;
+
+        function openForm(formType, recordId = null) {
+            currentFormType = formType;
+            currentRecordId = recordId;
+            const modal = document.getElementById('form-modal');
+            const title = document.getElementById('form-title');
+            const content = document.getElementById('form-content');
+
+            title.textContent = recordId ? `Edit ${formType}` : `Add ${formType}`;
+            content.innerHTML = generateFormHTML(formType, recordId);
+            modal.classList.add('active');
+        }
+
+        function closeForm() {
+            document.getElementById('form-modal').classList.remove('active');
+            currentFormType = null;
+            currentRecordId = null;
+        }
+
+        function generateFormHTML(formType, recordId) {
+            switch(formType) {
+                case 'attendee':
+                    return `
+                        <div class="form-group">
+                            <label class="form-label required">Attendee Name</label>
+                            <input type="text" name="Attendee Name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Arrival Date</label>
+                            <input type="date" name="Arrival Date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Departure Date</label>
+                            <input type="date" name="Departure Date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Arrival Method</label>
+                            <select name="Arrival Method" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Drive">Drive</option>
+                                <option value="Ship">Ship</option>
+                                <option value="Fly">Fly</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select name="Status" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea name="Notes" class="form-textarea"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    `;
+                case 'vehicle':
+                    return `
+                        <div class="form-group">
+                            <label class="form-label">Car Details</label>
+                            <input type="text" name="Car Details" class="form-input" placeholder="Make, model, year, color">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Transport Method</label>
+                            <select name="Transport Method" class="form-select" id="transport-method">
+                                <option value="">Select...</option>
+                                <option value="Driven">Driven</option>
+                                <option value="Shipped">Shipped</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="shipping-fields" style="display: none;">
+                            <label class="form-label">Shipping Provider</label>
+                            <input type="text" name="Shipping Provider" class="form-input">
+                            <label class="form-label">Shipping Start Date</label>
+                            <input type="date" name="Shipping Start Date" class="form-input">
+                            <label class="form-label">Shipping Arrival Date</label>
+                            <input type="date" name="Shipping Arrival Date" class="form-input">
+                            <label class="form-label">Shipping Notes</label>
+                            <textarea name="Shipping Notes" class="form-textarea"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea name="Notes" class="form-textarea"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    `;
+                case 'route':
+                    return `
+                        <div class="form-group">
+                            <label class="form-label required">Route Name</label>
+                            <input type="text" name="Route Name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Date</label>
+                            <input type="date" name="Date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Start Location</label>
+                            <input type="text" name="Start Location" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Location</label>
+                            <input type="text" name="End Location" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Map Link</label>
+                            <input type="url" name="Map Link" class="form-input" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea name="Notes" class="form-textarea"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    `;
+                case 'schedule':
+                    return `
+                        <div class="form-group">
+                            <label class="form-label required">Event Name</label>
+                            <input type="text" name="Event Name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Event Type</label>
+                            <select name="Event Type" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Dinner">Dinner</option>
+                                <option value="Drive">Drive</option>
+                                <option value="Hotel Check-in">Hotel Check-in</option>
+                                <option value="Meetup">Meetup</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Date</label>
+                            <input type="date" name="Date" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Time</label>
+                            <input type="time" name="Time" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="Location" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea name="Notes" class="form-textarea"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    `;
+                case 'accommodation':
+                    return `
+                        <div class="form-group">
+                            <label class="form-label required">Accommodation Name</label>
+                            <input type="text" name="Accommodation Name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Accommodation Type</label>
+                            <select name="Accommodation Type" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Hotel">Hotel</option>
+                                <option value="Airbnb">Airbnb</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Check-in Date</label>
+                            <input type="date" name="Check-in Date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Check-out Date</label>
+                            <input type="date" name="Check-out Date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <textarea name="Notes" class="form-textarea"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    `;
+                default:
+                    return '<p>Unknown form type</p>';
+            }
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const fields = {};
+
+            // Convert form data to object, handling empty values
+            for (const [key, value] of formData.entries()) {
+                if (value && value.trim()) {
+                    // Handle date fields
+                    if (key.includes('Date')) {
+                        fields[key] = value;
+                    } else {
+                        fields[key] = value.trim();
+                    }
+                }
+            }
+
+            // Determine table name
+            const tableMap = {
+                'attendee': TABLES.ATTENDEES,
+                'vehicle': TABLES.VEHICLES,
+                'route': TABLES.ROUTES,
+                'schedule': TABLES.SCHEDULE,
+                'accommodation': TABLES.ACCOMMODATIONS
+            };
+
+            const tableName = tableMap[currentFormType];
+            if (!tableName) {
+                alert('Unknown form type');
+                return;
+            }
+
+            // Show loading
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
+
+            try {
+                let result;
+                if (currentRecordId) {
+                    // Update existing record
+                    result = await updateAirtableRecord(tableName, currentRecordId, fields);
+                } else {
+                    // Create new record
+                    result = await createAirtableRecord(tableName, fields);
+                }
+
+                if (result.error) {
+                    alert(`Error: ${result.error}`);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Success
+                closeForm();
+                await loadAllData(); // Reload all data
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.textContent = `Successfully ${currentRecordId ? 'updated' : 'created'} ${currentFormType}!`;
+                document.querySelector('.main-content').insertBefore(successDiv, document.querySelector('.main-content').firstChild);
+                setTimeout(() => successDiv.remove(), 3000);
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Close modal on overlay click
+        const formModal = document.getElementById('form-modal');
+        if (formModal) {
+            formModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeForm();
+                }
+            });
+        }
+
+        // ========== INLINE EDITING FUNCTIONS ==========
+        
+        function editField(tableType, recordId, fieldName, currentValue) {
+            const item = document.querySelector(`[data-record-id="${recordId}"]`);
+            if (!item) return;
+            
+            item.classList.add('item-editing', 'editing');
+            
+            // Focus the input field
+            const input = item.querySelector('.inline-edit input, .inline-edit select');
+            if (input) {
+                setTimeout(() => input.focus(), 100);
+            }
+        }
+
+        async function saveInlineEdit(tableType, recordId) {
+            const item = document.querySelector(`[data-record-id="${recordId}"]`);
+            if (!item) return;
+            
+            const inputs = item.querySelectorAll('.inline-edit input, .inline-edit select');
+            const fields = {};
+            
+            inputs.forEach(input => {
+                const fieldName = input.getAttribute('data-field');
+                if (fieldName && input.value) {
+                    fields[fieldName] = input.value.trim();
+                }
+            });
+            
+            if (Object.keys(fields).length === 0) {
+                cancelInlineEdit(tableType, recordId);
+                return;
+            }
+            
+            // Show loading
+            const saveBtn = item.querySelector('.btn-primary');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+            
+            const tableName = TABLES[tableType.toUpperCase()];
+            const result = await updateAirtableRecord(tableName, recordId, fields);
+            
+            if (result.error) {
+                alert(`Error: ${result.error}`);
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                return;
+            }
+            
+            // Success - reload data
+            await loadAllData();
+            
+            // Show success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = 'Record updated successfully!';
+            document.querySelector('.main-content').insertBefore(successDiv, document.querySelector('.main-content').firstChild);
+            setTimeout(() => successDiv.remove(), 2000);
+        }
+
+        function cancelInlineEdit(tableType, recordId) {
+            const item = document.querySelector(`[data-record-id="${recordId}"]`);
+            if (!item) return;
+            
+            item.classList.remove('item-editing', 'editing');
+            
+            // Reload this specific item's data
+            loadAllData();
+        }
+
+        // ========== FILTERING FUNCTIONS ==========
+        
+        function filterAttendees() {
+            const searchTerm = document.getElementById('attendee-search')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('attendee-status-filter')?.value || '';
+            const arrivalFilter = document.getElementById('attendee-arrival-filter')?.value || '';
+            
+            const container = document.getElementById('attendees-list');
+            const items = container.querySelectorAll('.attendee-item');
+            let visibleCount = 0;
+            
+            items.forEach(item => {
+                const name = item.querySelector('.attendee-name')?.textContent.toLowerCase() || '';
+                const status = item.getAttribute('data-status') || '';
+                const arrival = item.getAttribute('data-arrival') || '';
+                
+                const matchesSearch = !searchTerm || name.includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                const matchesArrival = !arrivalFilter || arrival.includes(arrivalFilter);
+                
+                if (matchesSearch && matchesStatus && matchesArrival) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Update count badge
+            const countBadge = document.getElementById('attendee-count');
+            if (countBadge) {
+                countBadge.textContent = `${visibleCount}${visibleCount !== items.length ? ` of ${items.length}` : ''}`;
+            }
+        }
+
+        function filterVehicles() {
+            const transportFilter = document.getElementById('vehicle-transport-filter')?.value || '';
+            
+            const container = document.getElementById('logistics-list');
+            const items = container.querySelectorAll('.logistics-card');
+            let visibleCount = 0;
+            
+            items.forEach(item => {
+                const transport = item.getAttribute('data-transport') || '';
+                const matches = !transportFilter || transport === transportFilter;
+                
+                if (matches) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            const countBadge = document.getElementById('logistics-count');
+            if (countBadge) {
+                countBadge.textContent = `${visibleCount}${visibleCount !== items.length ? ` of ${items.length}` : ''}`;
+            }
+        }
+
+        function filterSchedule() {
+            const typeFilter = document.getElementById('schedule-type-filter')?.value || '';
+            
+            const container = document.getElementById('schedule-list');
+            const items = container.querySelectorAll('.schedule-item');
+            let visibleCount = 0;
+            
+            items.forEach(item => {
+                const eventType = item.getAttribute('data-event-type') || '';
+                const matches = !typeFilter || eventType === typeFilter;
+                
+                if (matches) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function clearAttendeeFilters() {
+            document.getElementById('attendee-search').value = '';
+            document.getElementById('attendee-status-filter').value = '';
+            document.getElementById('attendee-arrival-filter').value = '';
+            filterAttendees();
+        }
+
+        function clearVehicleFilters() {
+            document.getElementById('vehicle-transport-filter').value = '';
+            filterVehicles();
+        }
+
+        function clearScheduleFilters() {
+            document.getElementById('schedule-type-filter').value = '';
+            filterSchedule();
+        }
+
+        // ========== REGISTRATION FORM FUNCTIONS ==========
+        
+        function openRegistrationForm() {
+            // Check if Airtable is configured
+            if (!AIRTABLE_TOKEN || !BASE_ID) {
+                alert('Airtable connection error. Please refresh the page.');
+                return;
+            }
+            
+            document.getElementById('registration-modal').classList.add('active');
+        }
+
+        function closeRegistrationForm() {
+            document.getElementById('registration-modal').classList.remove('active');
+            // Reset form
+            document.getElementById('registration-form').reset();
+        }
+
+        async function handleRegistrationSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const fields = {};
+
+            // Convert form data to object
+            for (const [key, value] of formData.entries()) {
+                if (value && value.trim()) {
+                    fields[key] = value.trim();
+                }
+            }
+
+            // Set default status
+            fields['Status'] = 'Pending';
+
+            // Show loading
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                const result = await createAirtableRecord(TABLES.ATTENDEES, fields);
+
+                if (result.error) {
+                    alert(`Error submitting registration: ${result.error}\n\nPlease try again or contact support.`);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Success
+                closeRegistrationForm();
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.style.position = 'fixed';
+                successDiv.style.top = '20px';
+                successDiv.style.left = '50%';
+                successDiv.style.transform = 'translateX(-50%)';
+                successDiv.style.zIndex = '10000';
+                successDiv.style.maxWidth = '500px';
+                successDiv.textContent = 'Registration submitted successfully! We will review your submission and confirm shortly.';
+                document.body.appendChild(successDiv);
+                setTimeout(() => {
+                    successDiv.remove();
+                    loadAllData(); // Reload to show new attendee
+                }, 5000);
+
+            } catch (error) {
+                alert(`Error: ${error.message}\n\nPlease try again or contact support.`);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Close registration modal on overlay click
+        document.getElementById('registration-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRegistrationForm();
+            }
+        });
+
+        // Helper function for vehicle form shipping fields
+        function toggleShippingFields() {
+            const transportMethod = document.getElementById('transport-method');
+            const shippingFields = document.getElementById('shipping-fields');
+            if (transportMethod && shippingFields) {
+                shippingFields.style.display = transportMethod.value === 'Shipped' ? 'block' : 'none';
+            }
+        }
+
+        // ========== REGISTRATION FORM FUNCTIONS ==========
+        
+        function openRegistrationForm() {
+            // Check if Airtable is configured
+            if (!AIRTABLE_TOKEN || !BASE_ID) {
+                alert('Airtable connection error. Please refresh the page.');
+                return;
+            }
+            
+            document.getElementById('registration-modal').classList.add('active');
+        }
+
+        function closeRegistrationForm() {
+            document.getElementById('registration-modal').classList.remove('active');
+            // Reset form
+            const form = document.getElementById('registration-form');
+            if (form) form.reset();
+        }
+
+        async function handleRegistrationSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const fields = {};
+
+            // Convert form data to object
+            for (const [key, value] of formData.entries()) {
+                if (value && value.trim()) {
+                    fields[key] = value.trim();
+                }
+            }
+
+            // Set default status
+            fields['Status'] = 'Pending';
+
+            // Show loading
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                const result = await createAirtableRecord(TABLES.ATTENDEES, fields);
+
+                if (result.error) {
+                    alert(`Error submitting registration: ${result.error}\n\nPlease try again or contact support.`);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Success
+                closeRegistrationForm();
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.style.position = 'fixed';
+                successDiv.style.top = '20px';
+                successDiv.style.left = '50%';
+                successDiv.style.transform = 'translateX(-50%)';
+                successDiv.style.zIndex = '10000';
+                successDiv.style.maxWidth = '500px';
+                successDiv.style.padding = '20px';
+                successDiv.textContent = 'Registration submitted successfully! We will review your submission and confirm shortly.';
+                document.body.appendChild(successDiv);
+                setTimeout(() => {
+                    successDiv.remove();
+                    loadAllData(); // Reload to show new attendee
+                }, 5000);
+
+            } catch (error) {
+                alert(`Error: ${error.message}\n\nPlease try again or contact support.`);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Close registration modal on overlay click
+        if (document.getElementById('registration-modal')) {
+            document.getElementById('registration-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeRegistrationForm();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
