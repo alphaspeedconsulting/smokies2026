@@ -1196,19 +1196,19 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Location</span>
-                        <span class="info-value">Tapoco Lodge</span>
+                        <span class="info-value" id="event-location">Loading...</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Region</span>
-                        <span class="info-value">Great Smoky Mountains, TN</span>
+                        <span class="info-value" id="event-region">Loading...</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Date</span>
-                        <span class="info-value">April 20-24, 2026</span>
+                        <span class="info-value" id="event-date">Loading...</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Website</span>
-                        <span class="info-value link" onclick="window.open('https://www.tapoco.com/', '_blank')">tapoco.com</span>
+                        <span class="info-value link" id="event-website">Loading...</span>
                     </div>
                 </div>
 
@@ -1216,8 +1216,8 @@
                     <div class="card-header">
                         <h3 class="card-title">About The Event</h3>
                     </div>
-                    <p style="color: var(--grey-600); line-height: 1.7;">
-                        Smokies 2026 is an exclusive driving event bringing together automotive enthusiasts for an unforgettable experience through the Great Smoky Mountains. This curated gathering features world-class vehicles, scenic mountain routes, and luxury accommodations at the historic Tapoco Lodge.
+                    <p class="event-description" id="event-description" style="color: var(--grey-600); line-height: 1.7;">
+                        Loading event description...
                     </p>
                 </div>
             </div>
@@ -1524,7 +1524,8 @@
             VEHICLES: 'Vehicles',
             ROUTES: 'Routes',
             SCHEDULE: 'Schedule',
-            ACCOMMODATIONS: 'Accommodations'
+            ACCOMMODATIONS: 'Accommodations',
+            EVENT_SUMMARY: 'Event Summary'
         };
 
         // Mobile Menu Functions
@@ -1811,6 +1812,7 @@
         // Load all data
         async function loadAllData() {
             await Promise.all([
+                loadEventSummary(),
                 loadAttendees(),
                 loadLogistics(),
                 loadRoutes(),
@@ -1818,6 +1820,81 @@
                 loadAccommodations(),
                 loadGallery()
             ]);
+        }
+
+        // Load Event Summary
+        async function loadEventSummary() {
+            const data = await fetchAirtableData(TABLES.EVENT_SUMMARY);
+
+            if (data.error) {
+                console.error('Error loading event summary:', data.error);
+                // Keep default values if error
+                return;
+            }
+
+            if (!data.records || data.records.length === 0) {
+                console.warn('No event summary records found');
+                return;
+            }
+
+            // Get the first record (assuming single event)
+            const event = data.records[0].fields;
+
+            // Format date range
+            let dateDisplay = 'TBD';
+            if (event['Event Start Date'] && event['Event End Date']) {
+                const startDate = new Date(event['Event Start Date']);
+                const endDate = new Date(event['Event End Date']);
+                
+                // Format: "April 20-24, 2026" or "April 20 - May 2, 2026"
+                const startMonth = startDate.toLocaleDateString('en-US', { month: 'long' });
+                const startDay = startDate.getDate();
+                const endMonth = endDate.toLocaleDateString('en-US', { month: 'long' });
+                const endDay = endDate.getDate();
+                const year = startDate.getFullYear();
+
+                if (startMonth === endMonth) {
+                    dateDisplay = `${startMonth} ${startDay}-${endDay}, ${year}`;
+                } else {
+                    dateDisplay = `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+                }
+            } else if (event['Event Start Date']) {
+                const startDate = new Date(event['Event Start Date']);
+                dateDisplay = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            }
+
+            // Update location
+            const locationEl = document.getElementById('event-location');
+            if (locationEl && event['Location']) {
+                locationEl.textContent = event['Location'];
+            }
+
+            // Update region
+            const regionEl = document.getElementById('event-region');
+            if (regionEl && event['Region']) {
+                regionEl.textContent = event['Region'];
+            }
+
+            // Update date
+            const dateEl = document.getElementById('event-date');
+            if (dateEl) {
+                dateEl.textContent = dateDisplay;
+            }
+
+            // Update website
+            const websiteEl = document.getElementById('event-website');
+            if (websiteEl && event['Website']) {
+                const websiteUrl = event['Website'].startsWith('http') ? event['Website'] : `https://${event['Website']}`;
+                const websiteDisplay = event['Website'].replace(/^https?:\/\//, '').replace(/^www\./, '');
+                websiteEl.textContent = websiteDisplay;
+                websiteEl.onclick = () => window.open(websiteUrl, '_blank');
+            }
+
+            // Update description
+            const descriptionEl = document.getElementById('event-description');
+            if (descriptionEl && event['Event Description']) {
+                descriptionEl.textContent = event['Event Description'];
+            }
         }
 
         // Load Attendees
