@@ -2117,17 +2117,27 @@
                 if (website) {
                     const websiteUrl = website.startsWith('http') ? website : `https://${website}`;
                     const websiteText = website.replace(/^https?:\/\//, '').replace(/^www\./, '');
-                    websiteDisplay = `<a href="${websiteUrl}" target="_blank" class="info-value link" style="text-decoration: none; color: var(--teal);">${websiteText}</a>`;
+                    websiteDisplay = `<span class="info-value link" onclick="window.open('${websiteUrl}', '_blank')">${websiteText}</span>`;
+                } else {
+                    websiteDisplay = '<span class="info-value">-</span>';
                 }
 
                 return `
-                    <div class="accommodation-item">
-                        <div class="accommodation-info">
-                            <div class="accommodation-details">
-                                ${websiteDisplay ? `<div class="accommodation-name">${websiteDisplay}</div>` : ''}
-                                <div class="accommodation-type">${name}${dateDisplay ? ` • ${dateDisplay}` : ''}</div>
-                            </div>
+                    <div class="card">
+                        <div class="info-row">
+                            <span class="info-label">Website</span>
+                            ${websiteDisplay}
                         </div>
+                        <div class="info-row">
+                            <span class="info-label">Accommodation</span>
+                            <span class="info-value">${name}${type ? ` • ${type}` : ''}</span>
+                        </div>
+                        ${dateDisplay ? `
+                        <div class="info-row">
+                            <span class="info-label">Date</span>
+                            <span class="info-value">${dateDisplay}</span>
+                        </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
