@@ -37,6 +37,17 @@ jobs:
               AIRTABLE_BASE_ID: '${{ secrets.AIRTABLE_BASE_ID }}'
           };
           EOF
+          # Verify file was created and show first line (without exposing secrets)
+          ls -la env-config.js
+          head -n 1 env-config.js
+
+      - name: Verify env-config.js exists
+        run: |
+          if [ ! -f env-config.js ]; then
+            echo "ERROR: env-config.js was not created!"
+            exit 1
+          fi
+          echo "✅ env-config.js created successfully"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -45,6 +56,11 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+          # Explicitly include env-config.js to ensure it's uploaded
+          exclude-paths: |
+            .git
+            .github
+            node_modules
 
       - name: Deploy to GitHub Pages
         id: deployment
