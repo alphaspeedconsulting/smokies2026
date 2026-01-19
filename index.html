@@ -9,6 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Environment configuration -->
     <script src="env-config.js"></script>
+    <script>
+        // Ensure env-config.js is loaded before proceeding
+        if (typeof window.ENV === 'undefined') {
+            console.warn('env-config.js not loaded yet, waiting...');
+        }
+    </script>
     <style>
         :root {
             --teal: #14b8a6;
@@ -1598,7 +1604,22 @@
 
         // Load saved config on page load
         function initPage() {
-            // Check if credentials are pre-configured
+            // Load from environment config FIRST (env-config.js generated from .env)
+            if (window.ENV && window.ENV.AIRTABLE_PAT && window.ENV.AIRTABLE_BASE_ID) {
+                AIRTABLE_TOKEN = window.ENV.AIRTABLE_PAT;
+                BASE_ID = window.ENV.AIRTABLE_BASE_ID;
+                console.log('✅ Loaded credentials from env-config.js');
+                const tokenInput = document.getElementById('api-token');
+                const baseInput = document.getElementById('base-id');
+                if (tokenInput) tokenInput.value = AIRTABLE_TOKEN;
+                if (baseInput) baseInput.value = BASE_ID;
+                localStorage.setItem('airtable_token', AIRTABLE_TOKEN);
+                localStorage.setItem('base_id', BASE_ID);
+                loadAllData();
+                return;
+            }
+            
+            // Check if credentials are already set
             if (AIRTABLE_TOKEN && BASE_ID) {
                 const tokenInput = document.getElementById('api-token');
                 const baseInput = document.getElementById('base-id');
@@ -1610,14 +1631,6 @@
                 return;
             }
             
-            // Load from environment config (env-config.js generated from .env)
-            if (window.ENV && window.ENV.AIRTABLE_PAT && window.ENV.AIRTABLE_BASE_ID) {
-                AIRTABLE_TOKEN = window.ENV.AIRTABLE_PAT;
-                BASE_ID = window.ENV.AIRTABLE_BASE_ID;
-                loadAllData();
-                return;
-            }
-            
             // Fall back to localStorage if available (for development/testing)
             const savedToken = localStorage.getItem('airtable_token');
             const savedBaseId = localStorage.getItem('base_id');
@@ -1625,19 +1638,30 @@
             if (savedToken && savedBaseId) {
                 AIRTABLE_TOKEN = savedToken;
                 BASE_ID = savedBaseId;
+                console.log('✅ Loaded credentials from localStorage');
                 loadAllData();
             } else {
-                console.error('Airtable credentials not found. Please ensure env-config.js exists and is generated from .env file.');
+                console.error('❌ Airtable credentials not found. window.ENV:', window.ENV);
+                console.error('Please ensure env-config.js exists and is generated from .env file.');
             }
         }
         
-        // Initialize page when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPage);
-            document.addEventListener('DOMContentLoaded', initLightbox);
-        } else {
+        // Initialize page when DOM is ready - wait for env-config.js to load
+        function initializeApp() {
+            // Give env-config.js a moment to load if it hasn't already
+            if (typeof window.ENV === 'undefined') {
+                console.warn('Waiting for env-config.js to load...');
+                setTimeout(initializeApp, 100);
+                return;
+            }
             initPage();
             initLightbox();
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
         }
 
         // Initialize Lightbox
