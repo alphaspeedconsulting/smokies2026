@@ -1949,9 +1949,32 @@
             const websiteEl = document.getElementById('event-website');
             if (websiteEl && event['Website']) {
                 const websiteUrl = event['Website'].startsWith('http') ? event['Website'] : `https://${event['Website']}`;
-                const websiteDisplay = event['Website'].replace(/^https?:\/\//, '').replace(/^www\./, '');
+                
+                // Create friendly display text
+                let websiteDisplay = 'Visit Website';
+                try {
+                    const url = new URL(websiteUrl);
+                    const hostname = url.hostname.replace(/^www\./, '');
+                    // Extract domain name for display (e.g., "cloudbeds.com" -> "Book Accommodations")
+                    if (hostname.includes('cloudbeds')) {
+                        websiteDisplay = 'Book Accommodations';
+                    } else if (hostname.includes('booking') || hostname.includes('reservation')) {
+                        websiteDisplay = 'Make Reservation';
+                    } else {
+                        // Use domain name as fallback
+                        websiteDisplay = hostname.split('.')[0].charAt(0).toUpperCase() + hostname.split('.')[0].slice(1);
+                    }
+                } catch (e) {
+                    // If URL parsing fails, use cleaned URL
+                    websiteDisplay = event['Website'].replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+                }
+                
                 websiteEl.textContent = websiteDisplay;
+                websiteEl.style.cursor = 'pointer';
+                websiteEl.style.textDecoration = 'underline';
+                websiteEl.style.color = 'var(--teal)';
                 websiteEl.onclick = () => window.open(websiteUrl, '_blank');
+                websiteEl.title = websiteUrl; // Show full URL on hover
             }
 
             // Update description
