@@ -1166,6 +1166,20 @@
         </ul>
     </aside>
 
+    <!-- Password Modal for Logistics -->
+    <div id="logistics-password-modal" class="password-modal" style="display: none;">
+        <div class="password-modal-content">
+            <h2>Logistics Access</h2>
+            <p>This page contains sensitive information. Please enter the password to continue.</p>
+            <input type="password" id="logistics-password-input" class="password-input" placeholder="Enter password" autocomplete="off">
+            <div id="password-error" class="password-error" style="display: none; color: #ef4444; margin-top: 10px; font-size: 0.9rem;"></div>
+            <div class="password-modal-buttons">
+                <button onclick="checkLogisticsPassword()" class="btn btn-primary">Submit</button>
+                <button onclick="cancelLogisticsAccess()" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main class="main-content">
         <!-- Event Details Section -->
@@ -1517,6 +1531,10 @@
         // Configuration - Loaded from env-config.js (generated from .env file)
         let AIRTABLE_TOKEN = null;
         let BASE_ID = null;
+        let LOGISTICS_PASSWORD = null; // Password for Logistics page access
+        let LOGISTICS_AUTHENTICATED = false; // Track if user is authenticated
+        let LOGISTICS_PASSWORD = null; // Password for Logistics page access
+        let LOGISTICS_AUTHENTICATED = false; // Track if user is authenticated
         let ATTENDEES_CACHE = []; // Cache for dropdowns
         let ALL_RECORDS = {
             attendees: [],
@@ -1555,11 +1573,92 @@
             btn.classList.remove('active');
         }
 
+        // Password protection for Logistics
+        function showLogisticsPasswordModal() {
+            const modal = document.getElementById('logistics-password-modal');
+            const input = document.getElementById('logistics-password-input');
+            const error = document.getElementById('password-error');
+            
+            modal.style.display = 'flex';
+            input.value = '';
+            error.style.display = 'none';
+            input.focus();
+            
+            // Allow Enter key to submit
+            input.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    checkLogisticsPassword();
+                }
+            };
+        }
+
+        function hideLogisticsPasswordModal() {
+            const modal = document.getElementById('logistics-password-modal');
+            modal.style.display = 'none';
+        }
+
+        function checkLogisticsPassword() {
+            const input = document.getElementById('logistics-password-input');
+            const error = document.getElementById('password-error');
+            const enteredPassword = input.value.trim();
+            
+            // Get password from env-config or use default
+            const correctPassword = LOGISTICS_PASSWORD || 'smokies2026'; // Default fallback
+            
+            if (enteredPassword === correctPassword) {
+                LOGISTICS_AUTHENTICATED = true;
+                localStorage.setItem('logistics_authenticated', 'true');
+                hideLogisticsPasswordModal();
+                
+                // Show logistics section
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                const logisticsSection = document.getElementById('logistics');
+                if (logisticsSection) {
+                    logisticsSection.classList.add('active');
+                }
+                
+                // Update nav link
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelector('.nav-link[data-section="logistics"]').classList.add('active');
+            } else {
+                error.textContent = 'Incorrect password. Please try again.';
+                error.style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function cancelLogisticsAccess() {
+            hideLogisticsPasswordModal();
+            // Return to event details
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelector('.nav-link[data-section="event-details"]').classList.add('active');
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('event-details').classList.add('active');
+        }
+
         // Navigation - Initialize after DOM is ready
         function initNavigation() {
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
+                    
+                    // Get section ID
+                    const sectionId = this.getAttribute('data-section');
+                    if (!sectionId) {
+                        console.error('No data-section attribute found');
+                        return;
+                    }
+                    
+                    // Check if Logistics requires password
+                    if (sectionId === 'logistics' && !LOGISTICS_AUTHENTICATED) {
+                        showLogisticsPasswordModal();
+                        return;
+                    }
                     
                     // Update active nav link
                     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -1568,13 +1667,6 @@
                     // Close mobile menu if open
                     if (window.innerWidth <= 768) {
                         closeMobileMenu();
-                    }
-                    
-                    // Get section ID
-                    const sectionId = this.getAttribute('data-section');
-                    if (!sectionId) {
-                        console.error('No data-section attribute found');
-                        return;
                     }
                     
                     // Hide all sections
