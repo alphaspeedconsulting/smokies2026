@@ -1396,10 +1396,13 @@
                 <div class="card-header">
                     <h3 class="card-title">🚛 Car Shipping Information</h3>
                 </div>
-                <div style="padding: 1.5rem;">
-                    <p style="margin-bottom: 1.5rem; color: var(--grey-700); font-size: 1.05rem; line-height: 1.7;">
-                        Car shipping has been arranged for all participants. Below is important information regarding dates, locations, and costs.
-                    </p>
+                <div id="shipping-logistics-content" style="padding: 1.5rem;">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Loading shipping information...</div>
+                    </div>
+                </div>
+            </div>
 
                     <div style="margin-bottom: 2rem;">
                         <h4 style="color: var(--teal); font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -1741,7 +1744,8 @@
             ROUTES: 'Routes',
             SCHEDULE: 'Schedule',
             ACCOMMODATIONS: 'Accommodations',
-            EVENT_SUMMARY: 'Event Summary'
+            EVENT_SUMMARY: 'Event Summary',
+            SHIPPING_LOGISTICS: 'Shipping Logistics'
         };
 
         // Mobile Menu Functions
@@ -2185,6 +2189,7 @@
             await Promise.all([
                 loadEventSummary(),
                 loadAttendees(),
+                loadShippingLogistics(),
                 loadLogistics(),
                 loadRoutes(),
                 loadSchedule(),
@@ -2329,6 +2334,177 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Load Shipping Logistics
+        async function loadShippingLogistics() {
+            const container = document.getElementById('shipping-logistics-content');
+            if (!container) return;
+
+            const data = await fetchAirtableData(TABLES.SHIPPING_LOGISTICS);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error">Error loading shipping information: ${data.error}</div>`;
+                return;
+            }
+
+            if (!data.records || data.records.length === 0) {
+                container.innerHTML = '<p style="color: var(--grey-600);">No shipping information available.</p>';
+                return;
+            }
+
+            // Filter active records and sort by Order
+            const records = data.records
+                .filter(r => r.fields.Active !== false)
+                .sort((a, b) => (a.fields.Order || 999) - (b.fields.Order || 999));
+
+            // Group by Section
+            const bySection = {
+                'Dates': [],
+                'Costs': [],
+                'Contact': [],
+                'Payments': []
+            };
+
+            records.forEach(record => {
+                const section = record.fields.Section || 'Other';
+                if (bySection[section]) {
+                    bySection[section].push(record);
+                }
+            });
+
+            // Format currency
+            function formatCurrency(amount) {
+                if (!amount) return '';
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+            }
+
+            // Format date
+            function formatDateDisplay(dateStr) {
+                if (!dateStr) return '';
+                try {
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                } catch {
+                    return dateStr;
+                }
+            }
+
+            let html = `
+                <p style="margin-bottom: 1.5rem; color: var(--grey-700); font-size: 1.05rem; line-height: 1.7;">
+                    Car shipping has been arranged for all participants. Below is important information regarding dates, locations, and costs.
+                </p>
+            `;
+
+            // Dates Section
+            if (bySection.Dates.length > 0) {
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--teal); font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📅</span> Important Dates & Locations
+                        </h4>
+                        <div style="background: var(--grey-50); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--teal);">
+                            ${bySection.Dates[0]?.fields.Description ? `<div style="margin-bottom: 1rem;"><strong style="color: var(--grey-900);">${bySection.Dates[0].fields.Description}</strong></div>` : ''}
+                            <div style="display: grid; gap: 1rem;">
+                `;
+
+                bySection.Dates.forEach(record => {
+                    const fields = record.fields;
+                    const dateStr = fields.Date ? formatDateDisplay(fields.Date) : '';
+                    const timeStr = fields.Time ? `, ${fields.Time}` : '';
+                    const dateTime = dateStr ? `${dateStr}${timeStr}` : '';
+                    
+                    html += `
+                        <div style="padding: 0.75rem; background: white; border-radius: 6px;">
+                            ${dateTime ? `<div style="font-weight: 600; color: var(--teal); margin-bottom: 0.25rem;">${dateTime}</div>` : ''}
+                            ${fields.Title ? `<div style="font-weight: 600; color: var(--teal); margin-bottom: 0.25rem;">${fields.Title}</div>` : ''}
+                            ${fields.Location ? `<div style="color: var(--grey-700);">${fields.Description || ''} ${fields.Location ? `<strong>${fields.Location}</strong>` : ''}</div>` : fields.Description ? `<div style="color: var(--grey-700);">${fields.Description}</div>` : ''}
+                            ${fields.Address ? `<div style="color: var(--grey-600); font-size: 0.95rem; margin-top: 0.5rem;"><strong>Address:</strong> ${fields.Address}</div>` : ''}
+                            ${fields.Phone ? `<div style="color: var(--grey-600); font-size: 0.95rem;"><strong>Phone:</strong> <a href="tel:${fields.Phone.replace(/[^0-9]/g, '')}" style="color: var(--teal); text-decoration: none;">${fields.Phone}</a></div>` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+
+            // Costs Section
+            if (bySection.Costs.length > 0) {
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--teal); font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>💰</span> Cost Breakdown
+                        </h4>
+                        <div style="background: var(--grey-50); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--teal);">
+                `;
+
+                bySection.Costs.forEach((record, index) => {
+                    const fields = record.fields;
+                    const isLast = index === bySection.Costs.length - 1;
+                    
+                    html += `
+                        <div style="${!isLast ? 'margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--grey-200);' : ''}">
+                            ${fields.Title ? `<div style="font-weight: 600; color: var(--grey-900); margin-bottom: 0.75rem;">${fields.Title}</div>` : ''}
+                            <div style="color: var(--grey-700); margin-left: 1rem; line-height: 1.8;">
+                                ${fields.Cost Amount ? `<div>• ${formatCurrency(fields['Cost Amount'])} ${fields['Cost Label'] || ''}</div>` : ''}
+                                ${fields.Description ? `<div style="color: var(--grey-600); font-size: 0.9rem; margin-top: 0.25rem;">${fields.Description}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+
+            // Contact Section
+            if (bySection.Contact.length > 0) {
+                html += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--teal); font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>✅</span> Action Required
+                        </h4>
+                        <div style="background: #fef3c7; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                `;
+
+                bySection.Contact.forEach(record => {
+                    const fields = record.fields;
+                    html += `
+                        ${fields.Description ? `<div style="font-weight: 600; color: var(--grey-900); margin-bottom: 0.75rem;">${fields.Description}</div>` : ''}
+                        <div style="color: var(--grey-700); margin-left: 1rem;">
+                            ${fields['Contact Name'] ? `<div style="margin-bottom: 0.5rem;"><strong>Contact:</strong> ${fields['Contact Name']}</div>` : ''}
+                            ${fields['Contact Phone'] ? `<div style="margin-bottom: 1rem;"><strong>Phone:</strong> <a href="tel:${fields['Contact Phone'].replace(/[^0-9]/g, '')}" style="color: var(--teal); text-decoration: none; font-weight: 600;">${fields['Contact Phone']}</a></div>` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+
+            // Payments Section
+            if (bySection.Payments.length > 0) {
+                html += `
+                    <div>
+                        <h4 style="color: var(--teal); font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📋</span> Payment Breakdown
+                        </h4>
+                        <div style="background: var(--grey-50); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--teal);">
+                            <div style="display: grid; gap: 0.75rem;">
+                `;
+
+                bySection.Payments.forEach(record => {
+                    const fields = record.fields;
+                    html += `
+                        <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: white; border-radius: 6px; align-items: center;">
+                            <span style="font-weight: 500; color: var(--grey-900);">${fields.Title || 'N/A'}</span>
+                            <span style="font-weight: 600; color: var(--teal);">${fields['Cost Amount'] ? formatCurrency(fields['Cost Amount']) : ''}</span>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div></div>`;
+            }
+
+            container.innerHTML = html;
         }
 
         // Load Logistics (Vehicles)
