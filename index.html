@@ -2446,7 +2446,7 @@
                         <div style="${!isLast ? 'margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--grey-200);' : ''}">
                             ${fields.Title ? `<div style="font-weight: 600; color: var(--grey-900); margin-bottom: 0.75rem;">${fields.Title}</div>` : ''}
                             <div style="color: var(--grey-700); margin-left: 1rem; line-height: 1.8;">
-                                ${fields.Cost Amount ? `<div>• ${formatCurrency(fields['Cost Amount'])} ${fields['Cost Label'] || ''}</div>` : ''}
+                                ${fields['Cost Amount'] ? `<div>• ${formatCurrency(fields['Cost Amount'])} ${fields['Cost Label'] || ''}</div>` : ''}
                                 ${fields.Description ? `<div style="color: var(--grey-600); font-size: 0.9rem; margin-top: 0.25rem;">${fields.Description}</div>` : ''}
                             </div>
                         </div>
