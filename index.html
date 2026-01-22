@@ -1700,6 +1700,7 @@
             if (window.ENV && window.ENV.AIRTABLE_PAT && window.ENV.AIRTABLE_BASE_ID) {
                 AIRTABLE_TOKEN = window.ENV.AIRTABLE_PAT;
                 BASE_ID = window.ENV.AIRTABLE_BASE_ID;
+                LOGISTICS_PASSWORD = window.ENV.LOGISTICS_PASSWORD || null;
                 console.log('✅ Loaded credentials from env-config.js');
                 const tokenInput = document.getElementById('api-token');
                 const baseInput = document.getElementById('base-id');
@@ -1707,6 +1708,13 @@
                 if (baseInput) baseInput.value = BASE_ID;
                 localStorage.setItem('airtable_token', AIRTABLE_TOKEN);
                 localStorage.setItem('base_id', BASE_ID);
+                
+                // Check if user was previously authenticated for logistics
+                const logisticsAuth = localStorage.getItem('logistics_authenticated');
+                if (logisticsAuth === 'true') {
+                    LOGISTICS_AUTHENTICATED = true;
+                }
+                
                 loadAllData();
                 return;
             }
