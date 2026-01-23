@@ -1379,18 +1379,6 @@
                  alt="Line of Porsches and sports cars parked at car meet" 
                  class="section-banner">
 
-            <div class="filters-bar">
-                <div class="filter-group">
-                    <span class="filter-label">Transport Method:</span>
-                    <select id="vehicle-transport-filter" class="filter-select" onchange="filterVehicles()">
-                        <option value="">All</option>
-                        <option value="Driven">Driven</option>
-                        <option value="Shipped">Shipped</option>
-                    </select>
-                </div>
-                <button class="clear-filters" onclick="clearVehicleFilters()">Clear Filters</button>
-            </div>
-
             <!-- Car Shipping Information -->
             <div class="card" style="margin-bottom: 2rem;">
                 <div class="card-header">
@@ -1520,19 +1508,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Vehicles & Transportation</h3>
-                    <span class="card-badge" id="logistics-count">Loading...</span>
-                </div>
-                <div id="logistics-list" class="logistics-list">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        <div>Loading logistics information...</div>
                     </div>
                 </div>
             </div>
@@ -2190,7 +2165,6 @@
                 loadEventSummary(),
                 loadAttendees(),
                 loadShippingLogistics(),
-                loadLogistics(),
                 loadRoutes(),
                 loadSchedule(),
                 loadAccommodations(),
@@ -2505,58 +2479,6 @@
             }
 
             container.innerHTML = html;
-        }
-
-        // Load Logistics (Vehicles)
-        async function loadLogistics() {
-            const container = document.getElementById('logistics-list');
-            const countBadge = document.getElementById('logistics-count');
-            const statElement = document.getElementById('stat-vehicles');
-            const data = await fetchAirtableData(TABLES.VEHICLES);
-
-            if (data.error) {
-                container.innerHTML = `<div class="error">Error loading logistics: ${data.error}</div>`;
-                countBadge.textContent = 'Error';
-                return;
-            }
-
-            // Update count
-            if (data.records && data.records.length > 0) {
-                countBadge.textContent = data.records.length;
-                if (statElement) statElement.textContent = data.records.length;
-                ALL_RECORDS.vehicles = data.records; // Store for filtering
-                
-                // Display actual vehicle data
-                container.innerHTML = data.records.map(record => {
-                    const fields = record.fields;
-                    const carDetails = fields['Car Details'] || 'No details';
-                    const transportMethod = fields['Transport Method'] || 'TBD';
-                    const attendeeNames = fields['Attendees'] ? formatLinkedRecords(fields['Attendees']) : 'Unassigned';
-                    
-                    return `
-                        <div class="logistics-card">
-                            <div class="logistics-vehicle">
-                                <strong>${carDetails}</strong>
-                            </div>
-                            <div class="logistics-detail">
-                                <strong>Owner:</strong> ${attendeeNames}
-                            </div>
-                            <div class="logistics-detail">
-                                <strong>Transport:</strong> ${transportMethod}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                countBadge.textContent = '0';
-                if (statElement) statElement.textContent = '0';
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🚗</div>
-                        <div>No vehicles registered yet.</div>
-                    </div>
-                `;
-            }
         }
 
         // Load Routes
@@ -3209,31 +3131,6 @@
             }
         }
 
-        function filterVehicles() {
-            const transportFilter = document.getElementById('vehicle-transport-filter')?.value || '';
-            
-            const container = document.getElementById('logistics-list');
-            const items = container.querySelectorAll('.logistics-card');
-            let visibleCount = 0;
-            
-            items.forEach(item => {
-                const transport = item.getAttribute('data-transport') || '';
-                const matches = !transportFilter || transport === transportFilter;
-                
-                if (matches) {
-                    item.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            const countBadge = document.getElementById('logistics-count');
-            if (countBadge) {
-                countBadge.textContent = `${visibleCount}${visibleCount !== items.length ? ` of ${items.length}` : ''}`;
-            }
-        }
-
         function filterSchedule() {
             const typeFilter = document.getElementById('schedule-type-filter')?.value || '';
             
@@ -3259,11 +3156,6 @@
             document.getElementById('attendee-status-filter').value = '';
             document.getElementById('attendee-arrival-filter').value = '';
             filterAttendees();
-        }
-
-        function clearVehicleFilters() {
-            document.getElementById('vehicle-transport-filter').value = '';
-            filterVehicles();
         }
 
         function clearScheduleFilters() {
