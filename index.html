@@ -2520,25 +2520,42 @@
                 return;
             }
 
-            // Show summary card similar to Schedule page
-            container.innerHTML = `
-                <div class="schedule-item">
-                    <div class="schedule-date">TBD</div>
-                    <div class="schedule-title">Logistics Summary</div>
-                    <div class="schedule-description">
-                        Vehicle and transportation details will be updated as logistics are finalized. Check back soon for complete information.
-                    </div>
-                </div>
-            `;
-
-            // Update count if we have data
+            // Update count
             if (data.records && data.records.length > 0) {
                 countBadge.textContent = data.records.length;
                 if (statElement) statElement.textContent = data.records.length;
                 ALL_RECORDS.vehicles = data.records; // Store for filtering
+                
+                // Display actual vehicle data
+                container.innerHTML = data.records.map(record => {
+                    const fields = record.fields;
+                    const carDetails = fields['Car Details'] || 'No details';
+                    const transportMethod = fields['Transport Method'] || 'TBD';
+                    const attendeeNames = fields['Attendees'] ? formatLinkedRecords(fields['Attendees']) : 'Unassigned';
+                    
+                    return `
+                        <div class="logistics-card">
+                            <div class="logistics-vehicle">
+                                <strong>${carDetails}</strong>
+                            </div>
+                            <div class="logistics-detail">
+                                <strong>Owner:</strong> ${attendeeNames}
+                            </div>
+                            <div class="logistics-detail">
+                                <strong>Transport:</strong> ${transportMethod}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             } else {
                 countBadge.textContent = '0';
                 if (statElement) statElement.textContent = '0';
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🚗</div>
+                        <div>No vehicles registered yet.</div>
+                    </div>
+                `;
             }
         }
 
