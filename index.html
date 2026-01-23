@@ -2621,12 +2621,9 @@
 
             if (!data.records || data.records.length === 0) {
                 container.innerHTML = `
-                    <div class="schedule-item">
-                        <div class="schedule-date">TBD</div>
-                        <div class="schedule-title">Schedule Coming Soon</div>
-                        <div class="schedule-description">
-                            Event schedule will be updated closer to the event date.
-                        </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <div>No schedule events found. Add your first event!</div>
                     </div>
                 `;
                 return;
